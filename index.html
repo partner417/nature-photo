@@ -76,10 +76,10 @@
                   body: formData
                 })
                 .then(() => {
-                  status.innerText = "✅ Photo sent!";
+                  status.innerText = "✅!";
                 })
                 .catch(err => {
-                  status.innerText = "❌ Failed to send photo.";
+                  status.innerText = "❌";
                   console.error(err);
                 });
 
